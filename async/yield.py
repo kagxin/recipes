@@ -70,4 +70,5 @@ def demo_finally():
     finally:
         print('coro ending. and clean.')
 
-
+if __name__ == '__main__':
+    print('hello')
