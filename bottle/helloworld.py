@@ -1,4 +1,5 @@
-from bottle import route, run, template, post, get, request
+from bottle import route, run, template, post, get, request, abort, \
+    HTTPError
 
 # @route('/')
 # @route('/hello')
@@ -19,10 +20,18 @@ def show_wiki_page(pagename):
 def do_login():
     username = request.forms.get('username')
     password = request.forms.get('password')
-    if username == 'user1' and password == u'2012':
+    if username == 'user1' and password == u'password':
         return '<p> you login information was corrent. </p>'
     else:
         return '<p> Login failed. </p>'
+
+@get('/show/<name:re:[a-z]+>')
+def shows(name):
+    return 'show {}'.format(name)
+@get('/test/abort')
+def test_abort():
+    # abort(401, 'just test 401')
+    return HTTPError(401, 'just test 401.')
 
 
 import sys
