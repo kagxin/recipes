@@ -3651,7 +3651,7 @@ def run(app=None,
             fd, lockfile = tempfile.mkstemp(prefix='bottle.', suffix='.lock')  # 临时文件是唯一的
             os.close(fd)  # We only need this file to exist. We never write to it
             while os.path.exists(lockfile):
-                args = [sys.executable] + sys.argv
+                args = [sys.executable] + sys.argv  # 拿到完整的命令行参数
                 environ = os.environ.copy()
                 environ['BOTTLE_CHILD'] = 'true'
                 environ['BOTTLE_LOCKFILE'] = lockfile  # 设置两个环境变量
@@ -3705,13 +3705,10 @@ def run(app=None,
 
         if reloader:
             lockfile = os.environ.get('BOTTLE_LOCKFILE')
-            bgcheck = FileCheckerThread(lockfile, interval)  # 在当前进程中创建，check文件改变的线程
+            bgcheck = FileCheckerThread(lockfile, interval)  # 在当前进程中，创建用于check文件改变的线程
             with bgcheck:  # FileCheckerThread 实现了，上下文管理器协议, 
-                print('run before-----')
                 server.run(app)
-                print('run end------')
             if bgcheck.status == 'reload':  # 监控的module文件发生改变，以returncode=3退出子进程，父进程会拿到这个returncode重新启动一个子进程，即bottle服务进程
-                print('set exit is 3-----', flush=True)
                 sys.exit(3)
         else:
             server.run(app)
@@ -3746,7 +3743,7 @@ class FileCheckerThread(threading.Thread):
         for module in list(sys.modules.values()):
             path = getattr(module, '__file__', '')
             if path[-4:] in ('.pyo', '.pyc'): path = path[:-1]
-            if path and exists(path): files[path] = mtime(path)
+            if path and exists(path): files[path] = mtime(path)  # 拿到所有导入模块文件的modify time
 
         while not self.status:
             if not exists(self.lockfile)\
@@ -3754,10 +3751,10 @@ class FileCheckerThread(threading.Thread):
                 self.status = 'error'
                 thread.interrupt_main()
             for path, lmtime in list(files.items()):
-                if not exists(path) or mtime(path) > lmtime:
+                if not exists(path) or mtime(path) > lmtime:  # 如果文件发生改动，
                     self.status = 'reload'
-                    thread.interrupt_main()
-                    break
+                    thread.interrupt_main()  # raise 一个 KeyboardInterrupt exception in 主线程
+                    break 
             time.sleep(self.interval)
 
     def __enter__(self):
