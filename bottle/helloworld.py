@@ -43,7 +43,8 @@ import sys
 for m in list(sys.modules.values()):
     if 'helloworld.py' in str(m):
         print(m)
-print(sys.argv)
+
+
 if len(sys.argv) == 2:
     run(host='localhost', port=sys.argv[1], debug=True, reloader=True)
 else:
