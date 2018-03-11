@@ -1,5 +1,5 @@
 from bottle import route, run, template, post, get, request, abort, \
-    HTTPError, install
+    HTTPError, install, HTTPResponse
 from bottle_sqlite import SQLitePlugin
 
 install(SQLitePlugin(dbfile='./test.db'))
@@ -21,8 +21,10 @@ def show_wiki_page(pagename):
 @get('/login')
 @post('/login')  # or @route('/login', method='POST')
 def do_login():
-    username = request.forms.get('username')
-    password = request.forms.get('password')
+    print(request.headers['content_type'])
+    print(request.body.read())
+    username = request.POST.get('username')
+    password = request.POST.get('password')
     if username == 'user1' and password == u'password':
         return '<p> you login information was corrent. </p>'
     else:
@@ -36,6 +38,18 @@ def shows(name):
 def test_abort():
     # abort(401, 'just test 401')
     return HTTPError(401, 'just test 401.')
+
+@post('/pic')
+def upload_pic():
+    try:
+        print(request.headers['content_type'])
+        file = request.POST['pic']
+    except KeyError:
+        return HTTPResponse(status=400)
+
+    file.save('./')
+    return HTTPResponse(status=201)
+
 
 
 import sys
