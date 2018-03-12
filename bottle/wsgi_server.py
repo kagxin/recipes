@@ -8,6 +8,7 @@ def get_application(environ, start_response):
 
 
 if __name__ == '__main__':
-    httpd = make_server('', 8000, demo_app)
-    print('wsgi start.')
-    httpd.serve_forever()
+    with make_server('', 8000, demo_app) as httpd:
+        sa = httpd.socket.getsockname()
+        print("Serving HTTP on", sa[0], "port", sa[1], "...")
+        httpd.serve_forever()
