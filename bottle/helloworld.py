@@ -1,5 +1,5 @@
 from bottle import route, run, template, post, get, request, abort, \
-    HTTPError, install, HTTPResponse
+    HTTPError, install, HTTPResponse, Bottle
 from bottle_sqlite import SQLitePlugin
 
 install(SQLitePlugin(dbfile='./test.db'))
@@ -50,16 +50,39 @@ def upload_pic():
     file.save('./')
     return HTTPResponse(status=201)
 
+@get('/get')
+def test_get():
+    s = request.GET.get('a')
+    print(s)
+    return HTTPResponse('haha')
+
+
 
 
 import sys
-
 for m in list(sys.modules.values()):
     if 'helloworld.py' in str(m):
         print(m)
 
 
-if len(sys.argv) == 2:
-    run(host='localhost', port=sys.argv[1], debug=True, reloader=True)
-else:
-    run(host='localhost', port='8888', debug=True, reloader=True)
+
+# with Bottle() as b_app:
+#     @b_app.route('/with')
+#     def hello():
+#         return HTTPResponse('with')
+
+#     if len(sys.argv) == 2:
+#         run(host='localhost', port=sys.argv[1], debug=True, reloader=True)
+#     else:
+#         run(host='localhost', port='8888', debug=True, reloader=True)
+
+@route('/hello')
+def greet(name):
+    return HTTPResponse('hello2')
+
+with Bottle() as b_app:
+    @b_app.route('/hello')
+    def hello():
+        return HTTPResponse('hello')
+
+    run(host='localhost', port='8888', debug=True, reloader=True)        
