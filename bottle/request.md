@@ -15,12 +15,16 @@ bottle的request是用来处理封装environ字典的，这个字典是由wsgi�
     query方法在self.environ增加一个key 'bottle.get'，然后对QUERY_STRING进行了解析，经过装饰器返回一个类字典的只读对象供用户使用。用户代码就可以通过request.GET拿到GET请求的请求参数了。
 ####2、POST
     POST请求的数据都是放在body里进行行提交的，假如用户提交的是表单，这里关注environ中的四个key-value：
+
+
 ```python
         REQUEST_METHOD = 'POST'
         CONTENT_LENGTH = ''
         CONTENT_TYPE = 'multipart/form-data; boundary=----WebKitFormBoundary5N9kIKpwXYrgi5jb'
         wsgi.input = <_io.BufferedReader name=636>
  ```
+ 
+ 
     前三个不在多说。wsgi.input是wsgi服务器生成的一个文件对象通过environ传给了bottle，bottle就是通过这个file对象读取body中内容然后进行解析，查看BaseRequest.POST方法,在self._body 里对environ['wsgi.input']进行处理返回一个BytesIO()对象，然后借助cgi.FieldStorage类型解析body数据，返回表单键值对及文件对象。
 可以跑一下这个代码https://github.com/kagxin/recipes/blob/master/bottle/wsgi_server.py 这个代码使用，postman等客户端工具发起GET和POST请求查看environ变量的内容。定位到demo_app里到wsgiref.simple_server里看一下demo_app 和 主函数就知道 python -m wsigref.simple_server为什么是刚才的现象。simple_server是使用原来的HttpServer BaseHTTPRequestHandler,进行http协议的报文解析，在原有的解析内容中增加一些wsgi需要的key-value得到了wsgi标准的environ。
 
