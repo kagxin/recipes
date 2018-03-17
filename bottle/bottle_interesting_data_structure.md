@@ -1,13 +1,4 @@
-DictProperty
-cached_property
-lazy_attribute
-Bottle
-HeaderProperty
-_local_property
-MultiDict
-FormsDict
-HeaderDict
-auth_basic
+## Bottle中几个有趣的类结构
 
 #### DictPropery
 这个类的作用是将类中返回类字典对象的方法，变成一个read_only可控的属性(描述符)。
@@ -86,4 +77,87 @@ with Bottle() as b_app:
     run(host='localhost', port='8888', debug=True, reloader=True)
 ```
 
+#### MultiDict
+这个类实现了一个，value使用list存储的字典 ，存储重复 key 值时候 values 会以 list 形式都保存起来，默认返回list中最后一个value
+``` python
+class MultiDict(DictMixin):
+    """ This dict stores multiple values per key, but behaves exactly like a
+        normal dict in that it returns only the newest value for any given key.
+        There are special methods available to access the full list of values.
+    """
 
+    def __init__(self, *a, **k):
+        self.dict = dict((k, [v]) for (k, v) in dict(*a, **k).items())
+
+    def __delitem__(self, key):
+        del self.dict[key]
+
+    def __getitem__(self, key):
+        return self.dict[key][-1]
+
+    def __setitem__(self, key, value):
+        self.append(key, value)
+
+    def keys(self):
+        return self.dict.keys()
+
+    def get(self, key, default=None, index=-1, type=None):
+        try:
+            val = self.dict[key][index]
+            return type(val) if type else val
+        except Exception:
+            pass
+        return default
+
+    def append(self, key, value):
+        """ Add a new value to the list of values for this key. """
+        self.dict.setdefault(key, []).append(value)
+
+    def replace(self, key, value):
+        """ Replace the list of values with a single value. """
+        self.dict[key] = [value]
+
+    def getall(self, key):
+        """ Return a (possibly empty) list of values for a key. """
+        return self.dict.get(key) or []
+
+    #: Aliases for WTForms to mimic other multi-dict APIs (Django)
+    getone = get
+    getlist = getall
+```
+可以探查一下 MultiDict生成对象的update 和 pop方法的行为：
+``` python
+In [69]: dm = MultiDict()
+In [70]: dm['a'] = 1
+In [71]: dm['a'] = 2
+In [72]: dm.getlist('a')
+Out[72]: [1, 2]
+In [73]: dm.update({'a':3})
+In [74]: dm.getlist('a')
+Out[74]: [1, 2, 3]
+In [75]: dm.pop('a')
+Out[75]: 3
+In [76]: dm['a']
+---------------------------------------------------------------------------
+KeyError                                  Traceback (most recent call last)
+<ipython-input-76-54e5ceebc4de> in <module>()
+----> 1 dm['a']
+e:\py3env\lib\site-packages\bottle-0.13.dev0-py3.6.egg\bottle.py in __getitem__(self, key)
+   2093
+   2094     def __getitem__(self, key):
+-> 2095         return self.dict[key][-1]
+   2096
+   2097     def __setitem__(self, key, value):
+KeyError: 'a'
+```
+MultiDict没有重写update方法为什么，使用update方法给更新key'a'的时候，会默认将value加到value list里呢。因为update方法是的实现是通过操作dict[key]实现的。也就是使用了__getitem__, __setitem__, __delitem__方法。只要重新定制了这三个under方法，update就拥有现在的行为。可以定位到MutableMapping类中看一个update的实现。
+FormsDict类继承了MultiDict所以有类似的行为。
+HeaderDict类也继承了MulticDict，不过重写了__setitem__，__getitem__等方法，value还是以list的形式存储但只能有一个item。
+```python
+In [85]: hd = HeaderDict()
+In [86]: hd['a']='b'
+In [87]: hd['a']='c'
+In [89]: hd.getall('a')
+Out[89]: ['c']
+```
+HeaderDict的key在存取的时候使用str.title处理过，所以key是无关大小写的，同时对key中的'-'和'_'也做了等效处理,也就是request.headers.get('CONTENT-LENGTH')和request.headers.get('content_length')等效。
