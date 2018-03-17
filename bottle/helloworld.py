@@ -83,6 +83,9 @@ def greet(name):
 with Bottle() as b_app:
     @b_app.route('/hello')
     def hello():
+        cl = request.headers.get('Content-length')
+        cl = request.headers.get('content_length')
+        print(cl)
         return HTTPResponse('hello')
 
     run(host='localhost', port='8888', debug=True, reloader=True)        
