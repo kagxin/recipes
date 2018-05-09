@@ -13,7 +13,7 @@ class DefaultRouter(object):
         self.counter = counter()
 
     def db_for_read(self, model, **hints):
-        cnt = self.counter()
+        cnt = self.counter()     # 如果存在多个从数据库，可以使用该闭包做一个简单的轮循等权路由
         print('read from slave. cnt:%d'%cnt)
         return 'slave'
 

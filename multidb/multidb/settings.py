@@ -75,14 +75,14 @@ WSGI_APPLICATION = 'multidb.wsgi.application'
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {   # master db
+    'default': {   # master db 主数据作为默认数据库
         'NAME': 'multidb',
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'sync_user',
         'PASSWORD': '****',
         'HOST':'47.94.110.*'
     },
-    'slave': {  # slave db
+    'slave': {  # slave db 作为读数据库
         'NAME': 'multidb',
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'root',
@@ -90,7 +90,7 @@ DATABASES = {
         'HOST':'111.231.109.*'
     }
 }
-
+DATABASE_ROUTERS = ['multidb.router.DefaultRouter']  # 添加router
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-DATABASE_ROUTERS = ['multidb.router.DefaultRouter']
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
