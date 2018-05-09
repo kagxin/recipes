@@ -79,15 +79,15 @@ DATABASES = {
         'NAME': 'multidb',
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'sync_user',
-        'PASSWORD': 'p123456',
-        'HOST':'47.94.110.194'
+        'PASSWORD': '****',
+        'HOST':'47.94.110.*'
     },
     'slave': {  # slave db
         'NAME': 'multidb',
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST':'111.231.109.63'
+        'PASSWORD': '****',
+        'HOST':'111.231.109.*'
     }
 }
 
