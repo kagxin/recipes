@@ -3,8 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
-from app.models import Snippet
-from app.serializers import SnippetSerializer, AuthSerializer
+from app.models import Snippet, Artile, Commit
+from app.serializers import SnippetSerializer, AuthSerializer, ArtileSerializer, ArtileSerializer2
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
@@ -12,6 +12,8 @@ from django.http import Http404
 from rest_framework import permissions
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authentication import SessionAuthentication
+from rest_framework import generics, mixins
+from rest_framework.pagination import PageNumberPagination
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -91,3 +93,47 @@ class SnippetDetail(APIView):
         snippet = self.get_object(pk)
         snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class MyPaging(PageNumberPagination):
+
+    page_size_query_param = 'page_size'
+    page_size = 10
+
+
+class ArtileView(generics.ListCreateAPIView):
+
+    authentication_classes = (CsrfExemptSessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    pagination_class = MyPaging
+    queryset = Artile.objects.all()
+    serializer_class = ArtileSerializer
+
+
+class ArtileDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    authentication_classes = (CsrfExemptSessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ArtileSerializer
+    queryset = Artile.objects.all()
+
+
+class ArtileView2(generics.ListCreateAPIView):
+
+    authentication_classes = (CsrfExemptSessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    pagination_class = MyPaging
+    queryset = Artile.objects.all()
+    serializer_class = ArtileSerializer2
+
+
+class ArtileDetailView2(generics.RetrieveUpdateDestroyAPIView):
+
+    authentication_classes = (CsrfExemptSessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ArtileSerializer2
+    queryset = Artile.objects.all()
+
+
+

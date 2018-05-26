@@ -17,3 +17,26 @@ class Snippet(models.Model):
 
     class Meta:
         ordering = ('created',)
+
+class Artile(models.Model):
+
+    title = models.CharField('标题', max_length=200, help_text='标题')
+    subtitle = models.CharField('副标题', max_length=200)
+    body = models.TextField('正文')
+    create_time = models.DateTimeField('create_time', auto_now_add=True)
+
+    class Meta:
+        db_table = 'artile'
+        verbose_name = u'artile'
+
+
+class Commit(models.Model):
+
+    title = models.CharField('title', max_length=200)
+    text = models.TextField('text')
+    atrtle = models.ForeignKey(Artile, related_name='commits', verbose_name='artile', help_text='artile', on_delete=models.CASCADE)
+    create_time = models.DateTimeField('create_time', auto_now_add=True)
+
+    class Meta:
+        db_table = 'commit'
+        verbose_name = 'commit'
