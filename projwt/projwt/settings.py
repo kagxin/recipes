@@ -148,4 +148,5 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_ALGORITHM': 'HS256',
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    # 'JWT_AUTH_COOKIE':'jwt_token'
 }
